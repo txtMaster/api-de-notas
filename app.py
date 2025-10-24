@@ -1,17 +1,18 @@
+import os
 from flask import Flask
-from .src.db import mysql
-from .src.mail import mail
-from .src.config import Config
+from src.db import mysql
+from src.mail import mail
+from src.config import Config
 
 def create_app():
    app = Flask(__name__)
 
    app.config.from_object(Config)
 
-   from .src.routes.users import users_bp
-   from .src.routes.pages import pages_bp
-   from .src.routes.folders import folders_bp
-   from .src.routes.notes import notes_bp
+   from src.routes.users import users_bp
+   from src.routes.pages import pages_bp
+   from src.routes.folders import folders_bp
+   from src.routes.notes import notes_bp
 
    app.register_blueprint(users_bp)
    app.register_blueprint(pages_bp)

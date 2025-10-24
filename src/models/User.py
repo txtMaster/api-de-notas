@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Optional
 
-from .BaseModel import BaseModel
+from src.models.BaseModel import BaseModel
 
 class User(BaseModel):
     def __init__(

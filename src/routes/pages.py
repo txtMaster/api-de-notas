@@ -1,12 +1,12 @@
 from flask import Blueprint, render_template, request
 from itsdangerous import BadSignature, SignatureExpired
 
-from ..utils.responses import APIResponse
+from src.utils.responses import APIResponse
 
-from ..utils.security import get_serializer
+from src.utils.security import get_serializer
 
-from ..config import Config
-from ..db import mysql
+from src.config import Config
+from src.db import mysql
 
 pages_bp = Blueprint("pages",__name__)
 

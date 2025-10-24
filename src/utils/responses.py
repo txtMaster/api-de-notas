@@ -1,6 +1,6 @@
 from flask import Response, jsonify
 from http import HTTPStatus
-from ..config import Config
+from src.config import Config
 
 class APIResponse:
     

@@ -1,7 +1,7 @@
 import bcrypt
 from itsdangerous import URLSafeTimedSerializer
 
-from ...src.config import Config
+from src.config import Config
 
 def hash_password(password:str)->str:
     return bcrypt.hashpw(

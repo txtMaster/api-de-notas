@@ -1,13 +1,13 @@
 from flask import Blueprint, request
 
-from ..utils.routes import verify_body
+from src.utils.routes import verify_body
 
-from ..utils.responses import APIResponse
-from ..db import mysql
+from src.utils.responses import APIResponse
+from src.db import mysql
 
-from ..utils.jwt_handler import token_required
+from src.utils.jwt_handler import token_required
 
-from ..models.Note import Note
+from src.models.Note import Note
 
 notes_bp = Blueprint("notes",__name__)
 
