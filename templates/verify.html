@@ -1,0 +1,35 @@
+{% extends "./template.html" %}
+{% block title %} Verificación de cuenta {% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for("static",filename="css/verify.css") }}">
+{% endblock %}
+
+{% block body %}
+    {% if data.success %}
+        <h1 class="success">✅ ¡Correo verificado con éxito!</h1>
+    {% else %}
+        <h1 class="error">⚠️ Error de verificación</h1>
+    {% endif %}
+    <div class="verify-container">
+    {% if data.success %}
+        <p class="message">Tu dirección <strong>{{ data.email or "" }}</strong> ha sido confirmada.</p>
+        {% if data.login %}
+            {% if data.email %}
+                <a class="link" 
+                    href="{{data.login}}?email={{data.email}}">
+                    Iniciar Sesion
+                </a>
+            {% else %}
+                <a class="link" href="{{data.login}}">
+                    Iniciar Sesion
+                </a>
+            {% endif %}    
+        {% endif %}
+    {% else %}
+        <p class="error-message">
+            {{ data.error }}
+        </p>
+    {% endif %}
+</div>
+{% endblock %}

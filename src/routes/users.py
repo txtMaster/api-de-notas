@@ -1,16 +1,23 @@
-from typing import Optional
-from flask import Blueprint,jsonify, request
+from email.message import Message
+from flask import Blueprint,jsonify, redirect, request, url_for
 import bcrypt
+from itsdangerous import BadSignature, SignatureExpired
 
-from ..utils.security import check_password
-from ..utils.jwt_handler import create_daily_jwt
+from ..config import Config
+
+from ..utils.security import check_password,get_serializer
+from ..utils.jwt_handler import create_daily_jwt,token_required
 from ..utils.responses import APIResponse
 from ..utils.routes import verify_body
 
 from ..models.Folder import Folder
 from ..models.User import User
 from ..models.Note import Note
+
 from ..db import mysql
+from ..mail import send_email
+
+from datetime import datetime,timedelta
 
 users_bp = Blueprint("users",__name__)
 
@@ -26,6 +33,7 @@ def show_users():
     with mysql.connection.cursor() as cur:
       cur.execute("""
                   SELECT 
+                    u.is_verified,
                     u.password,
                     u.id as user_id,
                     u.name,
@@ -37,24 +45,27 @@ def show_users():
       """,(email,))
       results = cur.fetchone()
       if not results: return APIResponse.NO_FOUND("Usuario no econtrado")
+
+      if not results[0]: 
+        return APIResponse.UNPROCESSABLE("Verifique su cuenta abriendo el mensaje enviando al correo registrado")
       
-      hashed_password = results[0]
+      hashed_password = results[1]
 
       if not check_password(password,hashed_password): 
         return APIResponse.UNAUTHORIZED("Credenciales invalidas")
 
       user = User(
-        id=results[1],
-        name=results[2],
-        email=results[3],
+        id=results[2],
+        name=results[3],
+        email=results[4],
         password=hashed_password
       )
 
       token = create_daily_jwt(user.id)
 
       root_folder = Folder(
-        id=results[4],
-        title=results[5],
+        id=results[5],
+        title=results[6],
         user_id=user.id,
         is_root=True
       )
@@ -117,43 +128,72 @@ def register_user(data):
   try:
     with mysql.connection.cursor() as cur:
       cur.execute("""
-                  INSERT INTO users (name,email,password) 
-                  VALUE (%s, %s, %s);
-      """,(name,email,hashedPass))
-      user_id = cur.lastrowid
-      mysql.connection.commit()
+                  SELECT id,is_verified,updated_at FROM users WHERE email = %s LIMIT 1
+      """,(email,))
+      user = cur.fetchone()
 
+      if user is None:
+        root_folder_title = "root"
+        cur.execute("""
+                    INSERT INTO users (name,email,password,is_verified) 
+                    VALUE (%s, %s, %s,FALSE);
+        """,(name,email,hashedPass))
+        user_id = cur.lastrowid
+        cur.execute("""
+                    INSERT INTO folders (user_id, parent_folder_id, title, is_root)
+                    VALUES (%s, NULL, %s,TRUE);
+        """,(user_id,root_folder_title))
+        mysql.connection.commit()
+      else:
+        user_id = user[0]
+        is_verified = user[1]
+        updated_at = user[2]
+        if is_verified: 
+          return APIResponse.BAD_REQUEST("la cuenta ya esta registrada correctamente")
+        elif datetime.now() - updated_at > timedelta(days=7):
+          return APIResponse.BAD_REQUEST("no puede intenter registrar un correo 2 veces seguidas en una misma semana")
+        
+        cur.execute("""
+                    UPDATE users 
+                    SET name = %s , password = %s
+                    WHERE id = %s AND email = %s;
+        """,(name,hashedPass,user_id,email))
+        mysql.connection.commit()
+        
       user = User(
         id=user_id,
         name=name,
         email=email,
         password=hashedPass
       )
-      root_folder_title = "root"
-      cur.execute("""
-                  INSERT INTO folders (user_id, parent_folder_id, title, is_root)
-                  VALUES (%s, NULL, %s,TRUE);
-      """,(user.id,root_folder_title))
-      root_folder_id = cur.lastrowid
-      mysql.connection.commit()
 
-      cur.execute("""
-                  SELECT created_at FROM folders WHERE id = %s;
-      """,(root_folder_id,))
-      
-      folder_created_at = cur.fetchone()[0]
+      token = get_serializer().dumps({"id":user_id,"email":email}, salt=Config.SALT)
+      verify_url = url_for("pages.verify_user",token=token, _external = True)
 
-      root_folder = Folder(
-        id=root_folder_id,
-        title=root_folder_title,
-        is_root=True,
-        user_id=user.id,
-        parent_folder_id=None,
-        created_at= folder_created_at
+      send_email(
+        subject="Verifica tu cuenta", 
+        recipients=[email],
+        html_body=f"""
+        <h3>Confirma tu cuenta</h3>
+        <p>Haz click en el siguiente enlace para verificar tu dirección de correo</p>
+        <p><a href='{verify_url}'>{verify_url}</a></p>
+        <p>Este enlace expira en 1 hora</p>
+        """
       )
-    return APIResponse.CREATED("user created",{
-      "user":user.to_dict(),
-      "root_folder":root_folder.to_dict()
-    })
 
   except Exception as e: return APIResponse.INTERNAL_ERROR(str(e))
+  
+  return APIResponse.CREATED("Usuario creado, revisa el mensaje de confirmacion enviado al correo registrado para validar tu registro")
+
+@users_bp.route("/users",methods=["DELETE"])
+@token_required
+def delete_user():
+  user_id = request.user_id
+  try:
+    with mysql.connection.cursor() as cur:
+      cur.execute("""DELETE FROM users WHERE id = %s LIMIT 1 """,(user_id,))
+      mysql.connection.commit()
+      deleted = cur.rowcount == 1
+  except Exception as e:return APIResponse.INTERNAL_ERROR(str(e))
+  if deleted:return APIResponse.NO_CONTENT()
+  else: return APIResponse.BAD_REQUEST("no se encontro el usuario")

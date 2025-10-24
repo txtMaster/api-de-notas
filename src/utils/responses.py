@@ -1,5 +1,6 @@
 from flask import Response, jsonify
 from http import HTTPStatus
+from ..config import Config
 
 class APIResponse:
     
@@ -43,7 +44,13 @@ class APIResponse:
         return APIResponse.INCORRECT(HTTPStatus.UNPROCESSABLE_ENTITY,error)
     @staticmethod
     def INTERNAL_ERROR(error:str):
-        return APIResponse.INCORRECT(HTTPStatus.INTERNAL_SERVER_ERROR,error)
+        if Config.DEBUG:
+            return APIResponse.INCORRECT(HTTPStatus.INTERNAL_SERVER_ERROR,error)
+        else:
+            return APIResponse.INCORRECT(
+                HTTPStatus.INTERNAL_SERVER_ERROR,
+                "ocurrio un error, intentelo mas tarde"
+            )
     @staticmethod
     def UNAVAILABLE(error:str):
         return APIResponse.INCORRECT(HTTPStatus.SERVICE_UNAVAILABLE,error)

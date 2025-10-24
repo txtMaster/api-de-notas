@@ -29,7 +29,7 @@ class Note(BaseModel):
             "title":self.title,
             "content":self.content,
             "user_id":self.user_id,
-            "parent_folder_id":self.folder_id,
+            "folder_id":self.folder_id,
             "created_at":self.created_at,
             "updated_at":self.updated_at,
         }
