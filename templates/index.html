@@ -1,9 +1,9 @@
 {% extends "./template.html" %}
 {{ data.title }}
 {% block title %}{% endblock %}
-
 {% block body %}
     <h1>{{ data.welcome_message }}</h1>
+    actualizado 
     {% if data.len_cursos > 0 %}
         <ul>
             {% for c in data.cursos %}

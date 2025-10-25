@@ -33,14 +33,15 @@ def contact(name,age):
 
 @pages_bp.route("/users/verify",methods=["GET"])
 def verify_user():
+   print("-------------------------------------------")
    token = request.args.get("token")
    success=False
    email=None
    expired=False
    error=None
+   token_data = None
    if token is None: 
       error="token requerido"
-
    try:
       token_data = get_serializer().loads(token,salt=Config.SALT,max_age=3600)
    except SignatureExpired:
@@ -49,9 +50,11 @@ def verify_user():
    except BadSignature:
       error="token invalido"
    except Exception as e: return APIResponse.INTERNAL_ERROR(str(e))
+   print(token_data or "NO HAY TOKEN")
 
-   email:str = token_data.get("email")
-   id:int = int(token_data.get("id"))
+   if token_data is not None:
+      email:str = token_data.get("email")
+      id:int = int(token_data.get("id"))
 
    if email is None or id is None: 
       error="error al leer el token"

@@ -22,8 +22,8 @@ from datetime import datetime,timedelta
 users_bp = Blueprint("users",__name__)
 
 @users_bp.route("/users/login",methods=["POST"])
-def show_users():
-  data:dict = request.json or {}
+@verify_body(required={"email":str,"password":str})
+def show_users(data:dict):
   email = data.get("email")
   password = data.get("password")
   if not email or not password: 
