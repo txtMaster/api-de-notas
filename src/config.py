@@ -17,6 +17,7 @@ class Config():
 
     SECRET_KEY = os.getenv("SECRET_KEY")
     SALT = os.getenv("SALT")
+    PASS_SALT = os.getenv("PASS_SALT")
 
     MAIL_USERNAME = os.getenv('MAIL_USERNAME')
     MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")

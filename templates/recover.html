@@ -1,0 +1,70 @@
+{% extends "./template.html" %}
+{% block title %}Recuperar contraseña{% endblock %}
+{% block css %}
+<link rel="stylesheet" href="{{ url_for("static",filename="css/recover.css") }}">
+{% endblock %}
+{% block js %}
+<script src="{{ url_for("static",filename="js/recover.js") }}" type="module"></script>
+{% endblock %}
+
+{% block body %}
+    <h1>Recuperación de contraseña</h1>
+
+    <main>
+        {% if data.get("error") %}
+            ERROR: {{ data.error }}
+        {% else %}
+            <form action="{{ data.get("recover_url") }}" method="patch">
+                <input 
+                hidden
+                type="hidden" 
+                name="token"
+                value="{{ data.get("token") }}" 
+                required>
+                <input 
+                hidden
+                type="email" 
+                name="username" 
+                autocomplete="username"
+                value="{{ data.get("email") }}" 
+                required>
+                <div class="wrap-label">
+                    <label for="password">
+                        Nueva contraseña
+                    </label>
+                    <div class="wrap-input">
+                        <input 
+                        type="password" 
+                        id="password"
+                        name="password" 
+                        autocomplete="new-password"
+                        minlength="8"
+                        required>
+                        <button type="button" onclick="change_password(event)">
+                            show
+                        </button>
+                    </div>
+                    <small>minimo 8 caracteres</small>
+                </div>
+                <div class="wrap-label">
+                    <label for="password-copy">
+                        Repetir contraseña:
+                    </label>
+                    <div class="wrap-input">
+                        <input 
+                        type="password" 
+                        id="password-copy"
+                        name="password-copy" 
+                        autocomplete="new-password"
+                        required>
+                        <button type="button" onclick="change_password_copy(event)">
+                            show
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" id="submit">Guardar cambios</button>
+                <small id="error_message"></small>
+            </form>
+        {% endif %}
+    </main>
+{% endblock %}

@@ -1,11 +1,11 @@
 from email.message import Message
-from flask import Blueprint,jsonify, redirect, request, url_for
+from flask import Blueprint,jsonify, redirect, render_template, request, url_for
 import bcrypt
 from itsdangerous import BadSignature, SignatureExpired
 
 from src.config import Config
 
-from src.utils.security import check_password,get_serializer
+from src.utils.security import check_password, create_serialized,get_serializer,hash_password, try_verify_daily_serialized
 from src.utils.jwt_handler import create_daily_jwt,token_required
 from src.utils.responses import APIResponse
 from src.utils.routes import verify_body
@@ -167,7 +167,7 @@ def register_user(data):
         password=hashedPass
       )
 
-      token = get_serializer().dumps({"id":user_id,"email":email}, salt=Config.SALT)
+      token = create_serialized({"id":user_id,"email":email},Config.SALT)
       verify_url = url_for("pages.verify_user",token=token, _external = True)
 
       send_email(
@@ -197,3 +197,70 @@ def delete_user():
   except Exception as e:return APIResponse.INTERNAL_ERROR(str(e))
   if deleted:return APIResponse.NO_CONTENT()
   else: return APIResponse.BAD_REQUEST("no se encontro el usuario")
+
+@users_bp.route("/users/password",methods=["PATCH"])
+@token_required
+@verify_body(required={"password":str})
+def change_password(data:dict):
+  user_id = request.user_id
+  password = data.get("password")
+  password = hash_password(password)
+  try:
+    with mysql.connection.cursor() as cur:
+      cur.execute("""
+                  UPDATE users 
+                  SET password = %s
+                  WHERE id = %s LIMIT 1 
+      """,(password,user_id,))
+      mysql.connection.commit()
+      deleted = cur.rowcount == 1
+  except Exception as e:return APIResponse.INTERNAL_ERROR(str(e))
+  if deleted:return APIResponse.NO_CONTENT()
+  else: return APIResponse.BAD_REQUEST("no se encontro el usuario")
+
+@users_bp.route("/users/recover",methods=["POST"])
+@verify_body(required={"email":str})
+def recover_user(data:dict):
+  email = data.get("email")
+  token = create_serialized({"email":email},Config.PASS_SALT)
+  verify_url = url_for("pages.recover_account",token=token,_external=True)
+  try:
+    send_email(
+    subject="Recuperación de cuenta",
+    recipients=[email],
+    html_body=f"""
+      <h3>Recupera tu cuenta</h3>
+      <p>Haz click en el siguiente enlace para cambiar la contraseña de tu cuenta</p>
+      <p><a href='{verify_url}'>{verify_url}</a></p>
+      <p>Este enlace expira en 1 hora</p>
+    """
+    )
+  except Exception as e: return APIResponse.INTERNAL_ERROR(str(e))
+  return APIResponse.OK("Se envio un mensaje al correo registrado junto a un enlace para recuperar su cuenta")
+
+@users_bp.route("/users/recover-password",methods=["PATCH"])
+@verify_body(required={"token":str,"password":str})
+def recover_password(data:dict):
+  token = data.get("token")
+  password = data.get("password")
+
+  error,token_data = try_verify_daily_serialized(token,Config.PASS_SALT)
+  password = hash_password(password)
+  email = token_data.get("email")
+
+  if error is None and email is not None:
+    try:
+      with mysql.connection.cursor() as cur:
+        cur.execute("""
+                    UPDATE users
+                    SET password = %s
+                    WHERE email = %s AND TIMESTAMPDIFF(HOUR, updated_at,NOW()) >= 24
+                    LIMIT 1
+        """,(password,email))
+        mysql.connection.commit()
+        if cur.rowcount == 0: 
+          return APIResponse.BAD_REQUEST("no se encontro el usuario o ya se actualizo recientemente, intentelo luego de 24 horas")
+        
+    except Exception as e: return APIResponse.INTERNAL_ERROR(str(e))
+    return APIResponse.NO_CONTENT()
+  else: return APIResponse.INTERNAL_ERROR(error=error or "email no reconocido")

@@ -1,9 +1,10 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, url_for
 from itsdangerous import BadSignature, SignatureExpired
 
 from src.utils.responses import APIResponse
 
-from src.utils.security import get_serializer
+from src.utils.security import create_serialized, get_serializer, try_verify_daily_serialized
+from src.utils.routes import verify_body
 
 from src.config import Config
 from src.db import mysql
@@ -33,32 +34,24 @@ def contact(name,age):
 
 @pages_bp.route("/users/verify",methods=["GET"])
 def verify_user():
-   print("-------------------------------------------")
    token = request.args.get("token")
    success=False
    email=None
-   expired=False
    error=None
    token_data = None
    if token is None: 
-      error="token requerido"
-   try:
-      token_data = get_serializer().loads(token,salt=Config.SALT,max_age=3600)
-   except SignatureExpired:
-      error="el enlace expiro"
-      expired = True
-   except BadSignature:
-      error="token invalido"
-   except Exception as e: return APIResponse.INTERNAL_ERROR(str(e))
-   print(token_data or "NO HAY TOKEN")
+      return render_template("verify.html",data={
+         "success":False,
+         "error":"Token no proporcionado",
+      }),400
+   
+   error,token_data = try_verify_daily_serialized(token,Config.SALT)
 
    if token_data is not None:
       email:str = token_data.get("email")
       id:int = int(token_data.get("id"))
 
-   if email is None or id is None: 
-      error="error al leer el token"
-      expired=True
+   if email is None or id is None: error="error al leer el token"
   
    if error is None:
       try:
@@ -73,13 +66,35 @@ def verify_user():
             )
             mysql.connection.commit()
             success = cur.rowcount == 1
-      except Exception as e: 
-         return APIResponse.INTERNAL_ERROR(str(e))
+      except Exception as e: return APIResponse.INTERNAL_ERROR(str(e))
       
    return render_template("verify.html",data={
       "success":success,
       "email":email,
       "error":error or "Ocurrió un error o la cuenta ya esta registrada. Intente registrarse con su mismo correo luego de 7 dias",
-      "login":Config.LOGIN_URL,
-      "expired":expired
+      "login":Config.LOGIN_URL
    }),200 if success else 400
+
+
+@pages_bp.route("/recover",methods=["GET"])
+def recover_account():
+   token = request.args.get("token")
+   email = None
+   if token is None: 
+      return render_template("recover.html",data={
+         "success":False,
+         "token":token,
+         "error":"Token no proporcionado",
+      }),400
+   
+   error,token_data = try_verify_daily_serialized(token,Config.PASS_SALT)
+   
+   if token_data is not None: email = token_data.get("email")
+   else: error="no se pudo leer el token"
+
+   return render_template("recover.html",data={
+      "email":email,
+      "error":error,
+      "token":token,
+      "recover_url":url_for("users.recover_password",_external=True)
+   }),400 if error else 200

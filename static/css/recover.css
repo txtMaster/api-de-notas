@@ -1,0 +1,117 @@
+main{
+    width: 100%;
+    max-width: 80vmin;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+form{
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    button[type="submit"]{
+        letter-spacing: .1rem;
+        border: none;
+        color: white;
+        max-width: fit-content;
+        align-self: center;
+        font-size: large;
+        padding: .8rem;
+        border-radius: 100vmin;
+        transition-property: filter;
+        transition-duration: .2s;
+        border: 3px solid transparent;
+        border-radius: 50em;
+        background: 
+                linear-gradient(rgb(131, 87, 133) 0% 100%, white) padding-box;
+        &:hover{
+            filter: brightness(1.3);
+        }
+        &:focus-within{
+            filter: brightness(1.3);
+            background: 
+                linear-gradient(rgb(122, 87, 133) 0% 100%, white) padding-box,
+                linear-gradient(to right, rgb(229, 229, 255), rgb(217, 159, 246)) border-box;
+        }
+        &:disabled{
+            filter: saturate(0.2);
+        }
+        &.success{
+            filter: saturate(0.5);
+        }
+    }
+}
+label{
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+}
+
+input{
+    flex-grow: 1;
+    min-width: 0;
+}
+.wrap-label{
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+    label{
+        letter-spacing: .1rem;
+    }
+}
+
+.wrap-input{
+    min-width: fit-content;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: .4rem;
+    input{
+        padding-inline: .2rem;
+        text-indent: .2rem;
+        border-radius: 100px;
+        background-color: rgb(108, 103, 113);
+        color: white;
+        &:focus{
+            background-color: rgb(146, 139, 157);
+        }
+        &.error{
+            background-color: rgb(100, 78, 78);
+        }
+    }
+    button{
+        width: 4rem;
+        padding: .2rem .5rem;
+        border-radius: 100px;
+        background-color: rgb(75, 69, 78);
+        color: white;
+        border: none;
+        &:hover,&:focus-within{
+            filter: brightness(1.2);
+        }
+    }
+}
+#error_message{
+    text-align: center;
+    font-size: 1rem;
+    color: rgb(212, 177, 177);
+}
+
+small {
+    font-size: .8rem;
+    color: oklch(from currentColor calc(l * .85) c h);
+}
+
+
+@media screen and (max-width: 360px) {
+    html{
+        font-size: 4vmin;
+    }
+}
+@media screen and (min-width: 720px){
+    main{
+        max-width: 70vmin;
+    }
+}
