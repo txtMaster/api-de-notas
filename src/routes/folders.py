@@ -184,12 +184,12 @@ def delete_folders(data:dict):
             cur.execute(f"""
                         DELETE from folders
                         WHERE {where_query} AND user_id = %s
-                        LIMIT 1
             """,(*folders_ids,user_id))
-            mysql.connection.commit()
 
-            if cur.rowcount == 0:
-                return APIResponse.BAD_REQUEST("folder no renombrado")
+            if cur.rowcount != len(folders_ids):
+                return APIResponse.BAD_REQUEST("no se pudieron borrar los folders")
+            
+            mysql.connection.commit()
             
     except Exception as e: return APIResponse.INTERNAL_ERROR(str(e))
     return APIResponse.NO_CONTENT()

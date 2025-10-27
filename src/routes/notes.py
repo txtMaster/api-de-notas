@@ -111,37 +111,55 @@ def delete_notes(data:dict):
                         DELETE FROM notes 
                         WHERE {where_query} AND user_id = %s
             """,(*note_ids,user_id))
-            mysql.connection.commit()
 
-            if cur.rowcount == 0: 
-                return APIResponse.NO_FOUND("no se borro ni una nota")
+            if cur.rowcount != len(note_ids): 
+                return APIResponse.NO_FOUND("no se pudo borrar todas las notas")
+            
+            mysql.connection.commit()
+            
             
     except Exception as e: APIResponse.INTERNAL_ERROR(str(e))
     return APIResponse.NO_CONTENT()
 
-@notes_bp.route("/notes/<int:note_id>/move",methods=["PATCH"])
+@notes_bp.route("/notes/move",methods=["PATCH"])
 @token_required
-@verify_body(required={"folder_id":int})
-def move_note(note_id:int,data:dict):
+@verify_body(required={"folder_id":int,"note_ids":list})
+def move_note(data:dict):
     user_id = request.user_id
-    folder_id = data["folder_id"]
+    folder_id:int = int(data.get("folder_id"))
+    note_ids:list = data.get("note_ids")
+
+    if(
+        len(note_ids) == 0 or 
+        not all(isinstance(v,int) for v in note_ids)
+    ): 
+        return APIResponse.BAD_REQUEST("note_ids debe ser una lista no vacia de enteros")
+    
+    if len(note_ids) > 1:
+        in_func_query = f"id IN({','.join(['%s'] * len(note_ids))})"
+    else:
+        in_func_query = "id = %s "
     
     try:
         with mysql.connection.cursor() as cur:
-            cur.execute(
-                "SELECT id FROM folders WHERE id = %s AND user_id = %s",
-                (folder_id,user_id)
-            )
             cur.execute("""
+                        SELECT id 
+                        FROM folders 
+                        WHERE id = %s AND user_id = %s LIMIT 1
+            """,(folder_id,user_id))
+
+            if cur.fetchone() is None: 
+                return APIResponse.BAD_REQUEST("folder no encontrado")
+            
+            cur.execute(f"""
                         UPDATE notes 
                         SET folder_id = %s
-                        WHERE id = %s AND user_id = %s
-                        LIMIT 1
-            """,(folder_id,note_id,user_id))
+                        WHERE {in_func_query} AND user_id = %s
+            """,(folder_id,*note_ids,user_id))
             mysql.connection.commit()
 
             if cur.rowcount == 0: 
-                return APIResponse.NO_FOUND("no se encontro la nota")
+                return APIResponse.NO_FOUND("no se encontro alguna nota")
             
     except Exception as e: APIResponse.INTERNAL_ERROR(str(e))
 

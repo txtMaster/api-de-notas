@@ -33,6 +33,9 @@ def try_verify_serialized(token:str,salt:str,max_age:int = 3600):
 
 def try_verify_daily_serialized(token:str,salt:str):
     return try_verify_serialized(token,salt,86400)
+
+def try_verify_hourly_serialized(token:str,salt:str):
+    return try_verify_serialized(token,salt,3600)
     
 
 def create_serial_token():
