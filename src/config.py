@@ -1,4 +1,3 @@
-from flask import Flask
 from dotenv import load_dotenv
 import os
 
@@ -9,6 +8,8 @@ class Config():
     SERVER_NAME = os.getenv("SERVER_NAME")
 
     DEBUG:bool = os.getenv('DEBUG') == 'True'
+    FLASK_APP= os.getenv("FLASK_APP")
+    FLASK_DEBUG= os.getenv("FLASK_DEBUG")
 
     MYSQL_HOST = os.getenv('MYSQL_HOST')
     MYSQL_USER = os.getenv('MYSQL_USER')

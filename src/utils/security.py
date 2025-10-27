@@ -1,7 +1,7 @@
 import bcrypt
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
-from src.config import Config
+from ..config import Config
 
 def hash_password(password:str)->str:
     return bcrypt.hashpw(

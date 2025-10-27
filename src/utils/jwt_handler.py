@@ -3,7 +3,7 @@ from flask import jsonify, request
 import jwt
 import datetime
 
-from src.config import Config
+from ..config import Config
 
 SECRET_KEY = Config.SECRET_KEY
 ALGORITHM = "HS256"

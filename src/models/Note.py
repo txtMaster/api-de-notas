@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Optional
 from datetime import date
 
-from src.models.BaseModel import BaseModel
+from ..models.BaseModel import BaseModel
 
 class Note(BaseModel):
     def __init__(

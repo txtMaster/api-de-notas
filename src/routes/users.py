@@ -3,19 +3,19 @@ from flask import Blueprint,jsonify, redirect, render_template, request, url_for
 import bcrypt
 from itsdangerous import BadSignature, SignatureExpired
 
-from src.config import Config
+from ..config import Config
 
-from src.utils.security import check_password, create_serialized,get_serializer,hash_password, try_verify_daily_serialized
-from src.utils.jwt_handler import create_daily_jwt,token_required
-from src.utils.responses import APIResponse
-from src.utils.routes import verify_body
+from ..utils.security import check_password, create_serialized,get_serializer,hash_password, try_verify_daily_serialized
+from ..utils.jwt_handler import create_daily_jwt,token_required
+from ..utils.responses import APIResponse
+from ..utils.routes import verify_body
 
-from src.models.Folder import Folder
-from src.models.User import User
-from src.models.Note import Note
+from ..models.Folder import Folder
+from ..models.User import User
+from ..models.Note import Note
 
-from src.db import mysql
-from src.mail import send_email
+from ..db import mysql
+from ..mail import send_email
 
 from datetime import datetime,timedelta
 
