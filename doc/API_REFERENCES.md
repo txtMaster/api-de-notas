@@ -1,7 +1,7 @@
-## 📘 ENDPOINTS
+# 📘 ENDPOINTS
 Se omiten los endpoints de las vistas de verificacion de cuenta y recuperacion de contraseña
 
-### `REGISTRAR USUARIO`
+## `REGISTRAR USUARIO`
 Recurso usado para registrar un usuario y enviar un mensaje de verificacion a su correo para validar el registro
 
 **RUTA Y METODOS:** `/users/register (POST)`
@@ -23,7 +23,7 @@ Recurso usado para registrar un usuario y enviar un mensaje de verificacion a su
 
 ---
 
-### `LOGIN DE USUARIO`
+## `LOGIN DE USUARIO`
 Usado para obtener un token de verificacion para que el usuario pueda editar su cuenta, notas y carpetas
 
 **RUTA Y METODOS:** `/users/login (POST)`
@@ -57,7 +57,7 @@ HTTP 200
 ```
 
 
-### `CAMBIAR CONTRASEÑA DE USUARIO`
+## `CAMBIAR CONTRASEÑA DE USUARIO`
 Usado para cambiar la contraseña de un usuario con un token de sesion activo
 
 **RUTA Y METODOS:** `/users/password (PATH)`
@@ -79,7 +79,7 @@ Usado para cambiar la contraseña de un usuario con un token de sesion activo
 **RESPUESTA:** HTTP 204
 
 
-### `CREAR FORMULARIO DE RECUPERACION DE CONTRASEÑA`
+## `CREAR FORMULARIO DE RECUPERACION DE CONTRASEÑA`
 Usado para cambiar la contraseña de un usuario que olvido su contraseña enviandole un correo con un enlace con un formulario de cambio de contraseña
 
 **RUTA Y METODOS:** `/users/recover (POST)`
@@ -95,7 +95,7 @@ Usado para cambiar la contraseña de un usuario que olvido su contraseña envian
 
 
 
-### `CREAR NOTA`
+## `CREAR NOTA`
 Usado para crear una nota mientras en una sesion
 
 **RUTA Y METODOS:** `/notes (POST)`
@@ -129,7 +129,7 @@ HTTP 201
 }
 ```
 
-### `EDITAR NOTA`
+## `EDITAR NOTA`
 Usado para editar una nota mientras en una sesion
 
 **RUTA Y METODOS:** `/notes/<note_id> (PATCH)`
@@ -157,7 +157,7 @@ HTTP 200
 }
 ```
 
-### `MOVER NOTAS`
+## `MOVER NOTAS`
 Usado para mover varias notas durente una sesion
 
 **RUTA Y METODOS:** `/notes/move (PATCH)`
@@ -183,7 +183,7 @@ HTTP 200
 }
 ```
 
-### `BORRAR NOTAS`
+## `BORRAR NOTAS`
 usado para borrar notas en una sesion
 
 **RUTA Y METODOS:** `/notes (DELETE)`
@@ -198,7 +198,7 @@ usado para borrar notas en una sesion
 
 **CUERPO DE RESPUESTA:** HTTP 204
 
-### `OBTENER NOTAS Y FOLDERS HIJOS DE UN FOLDER`
+## `OBTENER NOTAS Y FOLDERS HIJOS DE UN FOLDER`
 Usado para obener el contenido directo de un folder en una sesion
 
 **RUTA Y METODOS:** `/folders/<folder_id>/childs (GET)`
@@ -218,7 +218,7 @@ HTTP 200
 }
 ```
 
-### `CREAR FOLDER`
+## `CREAR FOLDER`
 Usado para crear un folder en una sesion
 
 **RUTA Y METODOS:** `/folders (POST)`
@@ -243,7 +243,7 @@ HTTP 200
 }
 ```
 
-### `MOVER FOLDERS`
+## `MOVER FOLDERS`
 Usado para mover varios folders durente una sesion
 
 **RUTA Y METODOS:** `/folders/move (PATCH)`
@@ -269,7 +269,7 @@ HTTP 200
 ```
 
 
-### `RENOMBRAR FOLDER`
+## `RENOMBRAR FOLDER`
 Usado para cambiar el titulo de un folder durente una sesion
 
 **RUTA Y METODOS:** `/folders/<folder_id>/rename (PATCH)`
@@ -294,7 +294,7 @@ HTTP 200
 }
 ```
 
-### `BORRAR FOLDERS`
+## `BORRAR FOLDERS`
 usado para borrar folders de un usuario en una sesion
 
 **RUTA Y METODOS:** `/folders (DELETE)`
