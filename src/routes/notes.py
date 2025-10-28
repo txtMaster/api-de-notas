@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+from typing import Optional
 from flask import Blueprint, request
 
 from ..utils.routes import verify_body
@@ -49,6 +51,7 @@ def update_note(note_id,data:dict):
     user_id = request.user_id
     title = data.get("title")
     content = data.get("content")
+    updated_at:Optional[datetime] = None
     set_query_section:dict = {
         "query":[],
         "params":[]
@@ -68,25 +71,22 @@ def update_note(note_id,data:dict):
     
     try:
         with mysql.connection.cursor() as cur:
+            updated_at = datetime.now(timezone.utc)
             cur.execute(f"""
                         UPDATE notes
-                        SET {set_query_str}
+                        SET {set_query_str} AND updated_at = %s
                         WHERE id = %s AND user_id = %s
                         LIMIT 1
-            """,(tuple(set_query_section["params"]) + (note_id,user_id)))
+            """,(tuple(set_query_section["params"]) + (updated_at,note_id,user_id,)))
 
             mysql.connection.commit()
             
             if cur.rowcount == 0: 
                 return APIResponse.NO_FOUND("No se encontro la nota o hubo cambios")
 
-            cur.execute("""
-                        SELECT updated_at FROM notes WHERE id = %s
-            """,(note_id,))
-            updated_at = cur.fetchone()[0]
     except Exception as e: return APIResponse.INTERNAL_ERROR(str(e))
 
-    return APIResponse.OK("nota actualiada",{"updated_at":updated_at})
+    return APIResponse.OK("nota actualiada",{"updated_at":updated_at.isoformat()})
     
 
 @notes_bp.route("/notes",methods=["DELETE"])
@@ -121,10 +121,12 @@ def delete_notes(data:dict):
     except Exception as e: APIResponse.INTERNAL_ERROR(str(e))
     return APIResponse.NO_CONTENT()
 
+
 @notes_bp.route("/notes/move",methods=["PATCH"])
 @token_required
 @verify_body(required={"folder_id":int,"note_ids":list})
 def move_note(data:dict):
+    update_at: Optional[datetime] = None
     user_id = request.user_id
     folder_id:int = int(data.get("folder_id"))
     note_ids:list = data.get("note_ids")
@@ -151,16 +153,18 @@ def move_note(data:dict):
             if cur.fetchone() is None: 
                 return APIResponse.BAD_REQUEST("folder no encontrado")
             
+            update_at = datetime.now(timezone.utc)
             cur.execute(f"""
                         UPDATE notes 
-                        SET folder_id = %s
+                        SET folder_id = %s, updated_at = %s
                         WHERE {in_func_query} AND user_id = %s
-            """,(folder_id,*note_ids,user_id))
+            """,(folder_id,update_at,*note_ids,user_id))
             mysql.connection.commit()
 
             if cur.rowcount == 0: 
                 return APIResponse.NO_FOUND("no se encontro alguna nota")
             
     except Exception as e: APIResponse.INTERNAL_ERROR(str(e))
-
-    return APIResponse.NO_CONTENT()
+    return APIResponse.OK("notas movidas correctamente",{
+        "updated_at":update_at.isoformat()
+    })

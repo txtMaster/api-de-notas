@@ -1,7 +1,7 @@
+from datetime import datetime, timezone,timedelta
 from functools import wraps
 from flask import jsonify, request
 import jwt
-import datetime
 
 from ..config import Config
 
@@ -9,10 +9,11 @@ SECRET_KEY = Config.SECRET_KEY
 ALGORITHM = "HS256"
 
 def create_jwt(user_id:int,expire_in:int = 3600)->str:
+    now = datetime.now(timezone.utc)
     payload = {
         "user_id":user_id,
-        "exp":datetime.datetime.utcnow() + datetime.timedelta(seconds=expire_in),
-        "iat":datetime.datetime.utcnow()
+        "exp":now + timedelta(seconds=expire_in),
+        "iat":datetime.now(timezone.utc)
     }
     return jwt.encode(payload,SECRET_KEY,algorithm="HS256")
 

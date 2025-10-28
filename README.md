@@ -1,7 +1,10 @@
 # API de almacenamiento de notas
 
-## 📘 Descripción general
 Esta API fue hecha con Flask y MySQL que permite a los usuarios registrarse, autenticarse, crear y organizar notas por carpetas. Todo ello guardado en una base de datos,
+
+## 📘 Documentación de uso
+- ["documentacion de rutas"](/doc/API_REFERENCES.md)
+- ["diagramas de secuencias principales"](/doc/DIAGRAMS.md)
 
 ## ✅ Funcionalidades
 - Registrar usuarios
@@ -105,7 +108,3 @@ Esta API fue hecha con Flask y MySQL que permite a los usuarios registrarse, aut
     ```bash
     flask run
     ```
-
-
-## Documentacion
-en proceso.....

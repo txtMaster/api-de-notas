@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Optional
-from datetime import date
+from datetime import date, datetime
 
 from ..models.BaseModel import BaseModel
 
@@ -12,8 +12,8 @@ class Note(BaseModel):
             content:Optional[int] = None,
             user_id:Optional[int] = None,
             folder_id:Optional[int] = None,
-            created_at: Optional[date] = None,
-            updated_at: Optional[date] = None
+            created_at: Optional[datetime] = None,
+            updated_at: Optional[datetime] = None
     ):
         super().__init__(id)
         self.title = title
@@ -30,6 +30,6 @@ class Note(BaseModel):
             "content":self.content,
             "user_id":self.user_id,
             "folder_id":self.folder_id,
-            "created_at":self.created_at,
-            "updated_at":self.updated_at,
+            "created_at":self.created_at.isoformat() if self.created_at is not None else None,
+            "updated_at":self.updated_at.isoformat() if self.updated_at is not None else None,
         }

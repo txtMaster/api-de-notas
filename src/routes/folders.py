@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+from typing import Optional
 from flask import Blueprint, jsonify, request
 
 from ..models.Folder import Folder
@@ -98,6 +100,7 @@ def move_folder(data:dict):
     folder_ids:list = data["folder_ids"]
     parent_folder_id:int = data["parent_folder_id"]
     user_id = request.user_id
+    updated_at = Optional[datetime] = None
 
     if(
         len(folder_ids) == 0 or 
@@ -113,29 +116,33 @@ def move_folder(data:dict):
     else:
         in_func_query = " = %s "
 
-    params = (parent_folder_id,) + tuple(folder_ids) + (user_id,)
-
     try:
         with mysql.connection.cursor() as cur:    
-
             cur.execute("""
                         SELECT id FROM folders WHERE user_id = %s AND id = %s
             """,(user_id,parent_folder_id))
             if cur.fetchone() is None: 
                 return APIResponse.NO_FOUND("nuevo folder padre no encontrado")
-
+            
+            updated_at = datetime.now(timezone.utc)
             cur.execute(f"""
                         UPDATE folders
-                        SET parent_folder_id = %s
+                        SET parent_folder_id = %s, updated_at = %s
                         WHERE id {in_func_query} AND user_id = %s
-            """,params)
+                """,
+                (parent_folder_id,updated_at)
+                + tuple(folder_ids) 
+                + (user_id,)
+            )
             mysql.connection.commit()
 
             if cur.rowcount == 0: 
                 return APIResponse.BAD_REQUEST("no se pudo mover los folders")
 
     except Exception as e: return APIResponse.INTERNAL_ERROR(str(e))
-    return APIResponse.OK("folders movido")
+    return APIResponse.OK("folders movido",{
+        "updated_at":updated_at.isoformat()
+    })
 
     
 
@@ -145,23 +152,28 @@ def move_folder(data:dict):
 @verify_body(required={"title":str})
 def rename_folder(folder_id:int,data:dict):
     title = data["title"]
+    updated_at:Optional[datetime] = None
     user_id = request.user_id
 
     try:
-        with mysql.connection.cursor() as cur:    
+        with mysql.connection.cursor() as cur:
+                
+            updated_at = datetime.now(timezone.utc)
             cur.execute("""
                         UPDATE folders
-                        SET title = %s
+                        SET title = %s, updated_at = %s
                         WHERE id = %s AND user_id = %s
                         LIMIT 1
-            """,(title,folder_id,user_id))
+            """,(title,updated_at,folder_id,user_id))
             mysql.connection.commit()
 
             if cur.rowcount == 0:
                 return APIResponse.BAD_REQUEST("folder no renombrado")
             
     except Exception as e: return APIResponse.INTERNAL_ERROR(str(e))
-    return APIResponse.NO_CONTENT()
+    return APIResponse.OK("folder renombrado",{
+        "updated_at": updated_at.isoformat()
+    })
 
 @folders_bp.route("/folders",methods=["DELETE"])
 @token_required

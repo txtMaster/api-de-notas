@@ -1,3 +1,4 @@
+from datetime import date, datetime
 from email.message import Message
 from flask import Blueprint,jsonify, redirect, render_template, request, url_for
 import bcrypt
@@ -119,6 +120,8 @@ def register_user(data):
   name = data.get("name")
   email = data.get("email")
   password = data.get("password")
+  if len(password) < 8: 
+    return APIResponse.BAD_REQUEST("contraseña debe ser de minimo 8 caracteres")
   
   hashedPass = bcrypt.hashpw(
     password.encode("utf-8"),
@@ -147,7 +150,7 @@ def register_user(data):
       else:
         user_id = user[0]
         is_verified = user[1]
-        updated_at = user[2]
+        updated_at:datetime = user[2]
         if is_verified: 
           return APIResponse.BAD_REQUEST("la cuenta ya esta registrada correctamente")
         elif datetime.now() - updated_at > timedelta(days=7):
@@ -218,6 +221,7 @@ def change_password(data:dict):
   if deleted:return APIResponse.NO_CONTENT()
   else: return APIResponse.BAD_REQUEST("no se encontro el usuario")
 
+
 @users_bp.route("/users/recover",methods=["POST"])
 @verify_body(required={"email":str})
 def recover_user(data:dict):
@@ -237,6 +241,7 @@ def recover_user(data:dict):
     )
   except Exception as e: return APIResponse.INTERNAL_ERROR(str(e))
   return APIResponse.OK("Se envio un mensaje al correo registrado junto a un enlace para recuperar su cuenta")
+
 
 @users_bp.route("/users/recover-password",methods=["PATCH"])
 @verify_body(required={"token":str,"password":str})
