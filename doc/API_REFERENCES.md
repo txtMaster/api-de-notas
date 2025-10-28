@@ -7,7 +7,7 @@ Recurso usado para registrar un usuario y enviar un mensaje de verificacion a su
 **RUTA Y METODOS:** `/users/register (POST)`
 
 #### CUERPO
-```json
+```javascript
 {
     "name":"string",
     "email": "string",
@@ -29,7 +29,7 @@ Usado para obtener un token de verificacion para que el usuario pueda editar su 
 **RUTA Y METODOS:** `/users/login (POST)`
 
 #### CUERPO
-```json
+```javascript
 {
     "email": "string",
     "password": "string"
@@ -66,7 +66,7 @@ Usado para cambiar la contraseña de un usuario con un token de sesion activo
 - Authorization: **Bearer < JWT >**,
 
 #### CUERPO ESPERADO
-```json
+```javascript
 {
     "password": "string"
 }
@@ -85,7 +85,7 @@ Usado para cambiar la contraseña de un usuario que olvido su contraseña envian
 **RUTA Y METODOS:** `/users/recover (POST)`
 
 #### CUERPO
-```json
+```javascript
 {
     "email": "string"
 }
@@ -104,7 +104,7 @@ Usado para crear una nota mientras en una sesion
 - Authorization: **Bearer < JWT >**,
 
 #### CUERPO
-```json
+```javascript
 {
     "message":"nota creada",
     "payload":{
@@ -137,7 +137,7 @@ Usado para editar una nota mientras en una sesion
 #### ENCABEZADO
 - Authorization: **Bearer < JWT >**,
 #### CUERPO
-```json
+```javascript
 {
     "title": "string | null",
     "content": "string | null"
@@ -147,7 +147,7 @@ Usado para editar una nota mientras en una sesion
 - title y content son opcionales, pero no pueden faltar los 2 a la vez
 
 **CUERPO DE RESPUESTA:**
-```json
+```javascript
 HTTP 200
 {
     "message":"nota actualizada",
@@ -165,7 +165,7 @@ Usado para mover varias notas durente una sesion
 #### ENCABEZADO
 - Authorization: **Bearer < JWT >**,
 #### CUERPO
-```json
+```javascript
 {
     "folder_id":"int" /*folder destino */,
     "note_ids": "list[note_id]"
@@ -173,7 +173,7 @@ Usado para mover varias notas durente una sesion
 ```
 
 **CUERPO DE RESPUESTA:**
-```json
+```javascript
 HTTP 200
 {
     "message":"notas movidas correctamente",
@@ -190,7 +190,7 @@ usado para borrar notas en una sesion
 #### ENCABEZADO
 - Authorization: **Bearer < JWT >**,
 #### CUERPO
-```json
+```javascript
 {
     "note_ids": "list[note_id]"
 }
@@ -207,7 +207,7 @@ Usado para obener el contenido directo de un folder en una sesion
 
 
 **RESPUESTA:**
-```json
+```javascript
 HTTP 200
 {
     "message":"contenido econtrado",
@@ -225,14 +225,15 @@ Usado para crear un folder en una sesion
 #### ENCABEZADO
 - Authorization: **Bearer < JWT >**,
 #### CUERPO
-```json
+```javascript
 {
     "title": "string",
     "parent_folder_id":"int"
 }
+```
 
 **RESPUESTA:**
-```json
+```javascript
 HTTP 200
 {
     "message":"folder creado",
@@ -251,14 +252,14 @@ Usado para mover varios folders durente una sesion
 #### ENCABEZADO
 - Authorization: **Bearer < JWT >**,
 #### CUERPO
-```json
+```javascript
 {
     "folder_id":"int" /*folder destino */,
     "folder_ids": "list[folder_id]"
 }
 ```
 **CUERPO DE RESPUESTA:**
-```json
+```javascript
 HTTP 200
 {
     "message":"folder movido",
@@ -277,14 +278,14 @@ Usado para cambiar el titulo de un folder durente una sesion
 #### ENCABEZADO
 - Authorization: **Bearer < JWT >**,
 #### CUERPO
-```json
+```javascript
 {
     "folder_id":"int" /*folder destino */,
     "folder_ids": "list[folder_id]"
 }
 ```
 **CUERPO DE RESPUESTA:**
-```json
+```javascript
 HTTP 200
 {
     "message":"folder renombrado",
@@ -301,7 +302,7 @@ usado para borrar folders de un usuario en una sesion
 #### ENCABEZADO
 - Authorization: **Bearer < JWT >**,
 #### CUERPO
-```json
+```javascript
 {
     "folder_ids": "list[folder_id]"
 }
