@@ -188,6 +188,7 @@ def register_user(data):
   
   return APIResponse.CREATED("Usuario creado, revisa el mensaje de confirmacion enviado al correo registrado para validar tu registro")
 
+
 @users_bp.route("/users",methods=["DELETE"])
 @token_required
 def delete_user():
@@ -200,6 +201,7 @@ def delete_user():
   except Exception as e:return APIResponse.INTERNAL_ERROR(str(e))
   if deleted:return APIResponse.NO_CONTENT()
   else: return APIResponse.BAD_REQUEST("no se encontro el usuario")
+
 
 @users_bp.route("/users/password",methods=["PATCH"])
 @token_required
@@ -222,6 +224,7 @@ def change_password(data:dict):
   else: return APIResponse.BAD_REQUEST("no se encontro el usuario")
 
 
+
 @users_bp.route("/users/recover",methods=["POST"])
 @verify_body(required={"email":str})
 def recover_user(data:dict):
@@ -241,6 +244,7 @@ def recover_user(data:dict):
     )
   except Exception as e: return APIResponse.INTERNAL_ERROR(str(e))
   return APIResponse.OK("Se envio un mensaje al correo registrado junto a un enlace para recuperar su cuenta")
+
 
 
 @users_bp.route("/users/recover-password",methods=["PATCH"])

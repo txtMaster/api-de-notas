@@ -29,3 +29,4 @@ class Config():
     MAIL_DEFAULT_SENDER = (APP_NAME,MAIL_USERNAME)
 
     LOGIN_URL = os.getenv("LOGIN_URL")
+    FRONTEND_URL = os.getenv("FRONTEND_URL")

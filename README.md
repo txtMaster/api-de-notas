@@ -100,6 +100,8 @@ Esta API fue hecha con Flask y MySQL que permite a los usuarios registrarse, aut
     IS_HTTPS=True
     #url de redireccionamiento al finalizar registro de usuario
     LOGIN_URL="http://localhost:5000"
+    #url free of CORS
+    FRONTEND_URL="http://localhost:5173"
     SALT=email_salt_pe
     PASS_SALT=password-reset-salt
     ```
