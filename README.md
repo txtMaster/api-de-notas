@@ -42,7 +42,7 @@ Esta API fue hecha con Flask y MySQL que permite a los usuarios registrarse, aut
 - itsdangerous
 - bcrypt
 
-## 🚀 **Instalación y ejecución local** *(Instrucciones hechas en Linux)*
+## 🚀 **Instalación y ejecución** *(Instrucciones hechas en Linux)*
 1. Crear entorno virtual
     ```bash
     python -m venv venv
@@ -55,16 +55,18 @@ Esta API fue hecha con Flask y MySQL que permite a los usuarios registrarse, aut
     pip install -r requirements.txt
     ```
 
-3. Configurar base de datos y usuario
+3. Crear base de datos y usuario    
     ```sql
     CREATE DATABASE IF NOT EXISTS test_db;
     CREATE USER 'your_user'@'localhost' IDENTIFIED BY 'your_password';
     GRANT ALL PRIVILEGES ON test_db.* TO 'your_user'@'localhost' WITH GRANT OPTION;
     ```
-4. Importar configuracion de la base de datos
-    ```bash
-    mysql -u <your-db-user> -p <your-db-name> < build.sql 
-    ```
+4. Configurar DB con el script `build.sql`
+
+    - Si se usa **MySQL**, se requiere tener habilitada la creación de triggers sin ser superusuario o ser usuario SUPER o SYSTEM_VARIABLES_ADMIN antes de importar el script.
+
+    - Si se usa **MariaDB** puede importar el script de forma normal.
+
 
 5. Copiar el archivo .env.example y modificarlo con valores personales
 
