@@ -29,7 +29,7 @@ def show_users(data:dict):
   password = data.get("password")
   if not email or not password: 
     return APIResponse.BAD_REQUEST("password and email no found")
-
+  
   try: 
     with mysql.connection.cursor() as cur:
       cur.execute("""
@@ -173,6 +173,7 @@ def register_user(data):
       token = create_serialized({"id":user_id,"email":email},Config.SALT)
       verify_url = url_for("pages.verify_user",token=token, _external = True)
 
+      print("try send")
       send_email(
         subject="Verifica tu cuenta", 
         recipients=[email],

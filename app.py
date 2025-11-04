@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
 
@@ -13,8 +15,8 @@ from src.routes.notes import notes_bp
 
 app = Flask(__name__)
 app.config.from_object(Config)
-CORS(app,origins=[Config.FRONTEND_URL], supports_credentials=True)
 
+CORS(app,origins=[Config.FRONTEND_URL], supports_credentials=True)
 
 app.register_blueprint(users_bp)
 app.register_blueprint(pages_bp)
